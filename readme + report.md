@@ -6,5 +6,5 @@ Ikna is a simple flashcard creator for the command line. Ikna lets you create fl
 # Why a flashcard creator?
 Ikna was made because I have utilized studying with flashcards through Anki, which is an amazing piece of software that I highly recommend. I have a lot of respect for the people that create really good software like Anki, and I wanted to give a shot at creating my own flashcard studying program to see how difficult it was. I also wanted to highlight the power of my favorite data structure we learned about in this course: HashMaps. A flashcard creator that stores the flashcards you create (front and back side), and lets you study the them after is the most intuitive implementation of HashMaps/HashTables. I had a lot of fun making this program and I plan on expanding on it more and more throughout the next couple months, so that I can use it regularly.
 
-# Big O of Ikna
+# Ikna's Time Complexity
 Since Ikna utilizes HashMaps, and all the user does is store (insertion), retrieve (lookup), and delete (deletion) data from the HashMap, Ikna has a time complexity of O(1), which means the running time is constant, no matter the size of the input.
