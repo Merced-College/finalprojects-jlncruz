@@ -9,8 +9,9 @@ import java.util.HashMap;
 public class Main {
 
 	// commands when in the main menu
-	public static void commandMenu() {
+	public static void listCommands() {
 		System.out.println();
+		System.out.println("mm\tReturn to main menu.");
 		System.out.println("nd\tCreate a new deck.");
 		System.out.println("h\tDisplay command menu.");
 		System.out.println("q\tQuit program.");
@@ -26,26 +27,36 @@ public class Main {
 		System.out.println("n\tNext card.");
 	}
 
-	public static void main(String[] args) {
-		Scanner scnr = new Scanner(System.in);
-		System.out.println("Welcome to Ikna.");
+	public static void mainMenuGreet() {
+		System.out.println("\nWelcome to Ikna.");
 		System.out.println("You are currently in the main menu, where you can manage decks, see the help commands, or start studying a deck");
 		System.out.println("Enter \"nd\" to create a new deck, 'h' to show commands menu, or 'q' to quit.");
+	}
+
+	public static void deckDeletionPrompt() {
+		System.out.print("\nName of deck to delete (no spaces allowed + case sensitive) ");
+		System.out.print("(Enter \"mm\" to get back to main menu): ");
+	}
+
+	public static void main(String[] args) {
+		Scanner scnr = new Scanner(System.in);
+		mainMenuGreet();
 		var deckManager = new DeckManager();
 
+		boolean userWantsToGoToMainMenu = false;
 		boolean userQuit = false;
 		String deckName;
 		String userAnswer = scnr.next();
 		while (!userQuit) {
 			if (userAnswer.equals("nd")) {
-				System.out.print("Name of new deck (no spaces allowed): ");
+				System.out.print("\nName of new deck (ensure no spaces in deck name): ");
 				deckName = scnr.next();
 				deckManager.newDeck(deckName);
 				System.out.println("Enter \"nd\" to create another deck, or enter \"pd\" to see all your decks.");
 			}
 
 			else if (userAnswer.equals("h")) {
-				commandMenu();
+				listCommands();
 			}
 
 			else if (userAnswer.equals("pd")) {
@@ -63,6 +74,7 @@ public class Main {
 
 				boolean userInMainPartOfProgram = true;
 				while (userInMainPartOfProgram) {
+					// checks if HashMap that contains all decks is empty. If it's empty it prompts you to add decks to it.
 					if (deckManager.allDecks.isEmpty()) {
 						System.out.print("Looks like you don't have any decks. Would you like to create a deck? [y/n] ");
 						userAnswer = scnr.next();
@@ -82,76 +94,126 @@ public class Main {
 							}
 						}
 
+						else if (userAnswer.equals("n")) {
+							userQuit = true;
+						}
+
 						else {
-							System.out.println("Exiting program.");
-							break;
+							System.out.println("Invalid input. Please answer question with 'y' to create a new deck or 'n' to exit to main menu.");
 						}
 
 					}
 
-					boolean userReviewing = true;
-					System.out.print("\nEnter name of deck to review (ensure no spaces in deck name + case sensitive): ");
-					String deckToReview = scnr.next();
+					if (!userQuit) {
+						boolean userReviewing = true;
+						System.out.println("\nEnter name of deck to review (ensure no spaces in deck name + case sensitive)");
+						System.out.println("(Use \"pd\" to see all your decks!)");
+						String deckToReview = scnr.next();
 
-					if (deckManager.allDecks.containsKey(deckToReview)) {
+						boolean userMeantCommand = false;
+						if (deckToReview.equals("pd")) {
+							if (deckManager.allDecks.containsKey("pd")) {
+								System.out.println("There is a deck named \"pd\", which interferes with global command, \"pd\"");
+								System.out.println("Did you mean the deck, or the command? [deck/command]");
+								userAnswer = scnr.next();
 
-						// removes warning for HashMap unchecked conversion
-						@SuppressWarnings("unchecked")
-
-						HashMap<String, String> deckBeingReviewed = deckManager.allDecks.get(deckToReview);
-						if (deckBeingReviewed.isEmpty()) {
-							System.out.print("\nLooks like you don't have any cards in this deck. Would you like to add cards? (Enter 'y' to add cards and any other key to exit.) ");
-							userAnswer = scnr.next();
-							boolean userAddingCardsToDeck;
-							if (userAnswer.equals("y")) {
-								userAddingCardsToDeck = true;
-								while (userAddingCardsToDeck) {
-									System.out.print("Front of card: ");
-									String frontOfCard = scnr.next();
-									System.out.print("Back of card: ");
-									String backOfCard = scnr.next();
-									deckBeingReviewed.put(frontOfCard, backOfCard);
-									System.out.println("\nEnter \"nc\" to create another card.");
-									System.out.println("Enter any other key(s) to start reviewing deck.\n");
-									userAnswer = scnr.next();
-									if (!userAnswer.equals("nc")) {
-										userAddingCardsToDeck = false;
-									}
+								if (userAnswer.equals("command")) {
+									deckManager.printAllDecks();
+									userMeantCommand = true;
 								}
 							}
 
 							else {
-								System.out.println("Exiting program.");
-								userQuit = true;
-								break;
+								deckManager.printAllDecks();
 							}
 						}
-						System.out.println("Current deck being reviewed: " + deckToReview);
-						System.out.println("Use 'j' to see back of card and 'l' to move to next card.");
-						System.out.println("Use 'H' to see all deck commands.");
-						boolean userReviewingCurrentCard = true;
-							for (String keyValue : deckBeingReviewed.keySet()) {
-								while (userReviewingCurrentCard) {
-									System.out.println("\nFront of current card: " + keyValue);
-									String nextAction = scnr.next();
-									if (nextAction.equals("H")) {
-										deckCommands();
+
+						if (deckManager.allDecks.containsKey(deckToReview) && !userMeantCommand) {
+
+							// removes warning for HashMap unchecked conversion
+							@SuppressWarnings("unchecked")
+
+							HashMap<String, String> deckBeingReviewed = deckManager.allDecks.get(deckToReview);
+							if (deckBeingReviewed.isEmpty()) {
+								System.out.print("\nLooks like you don't have any cards in this deck. Would you like to add cards? [y/n]: ");
+								userAnswer = scnr.next();
+								while (!userAnswer.equals("r")) {
+									boolean userAddingCardsToDeck;
+									if (userAnswer.equals("y")) {
+										userAddingCardsToDeck = true;
+										while (userAddingCardsToDeck) {
+											System.out.print("Front of card: ");
+											String frontOfCard = scnr.next();
+											System.out.print("Back of card: ");
+											String backOfCard = scnr.next();
+											deckBeingReviewed.put(frontOfCard, backOfCard);
+											System.out.println("\nEnter \"nc\" to create another card.");
+											System.out.println("Press 'r' to start reviewing deck.\n");
+											userAnswer = scnr.next();
+											if (!userAnswer.equals("nc")) {
+												userAddingCardsToDeck = false;
+											}
+										}
 									}
-									else if (nextAction.equals("j"))  {
-										System.out.println("\nBack of current card: " + deckBeingReviewed.get(keyValue));
-									}
-									System.out.println("Use \"l\" to move to next card");
-									nextAction = scnr.next();
-									if (nextAction.equals("l")) {
-										userReviewingCurrentCard = false;
+
+									else {
+										System.out.print("Please enter 'y' or 'n' (Press 'r' to start reviewing deck): ");
+										userAnswer = scnr.next();
 									}
 								}
 							}
 
-					}
+							System.out.println("\nCurrent deck being reviewed: " + deckToReview);
+							System.out.println("Use 'j' to see back of card and 'l' to move to next card.");
+							System.out.println("Use 'H' to see all deck commands.");
 
-					else {
-						System.out.println("Deck not found. Try again.");
+							// main card reviewing logic
+							while (userReviewing) {
+								for (String keyValue : deckBeingReviewed.keySet()) {
+									String nextAction;
+									boolean nextCard = false;
+									System.out.println("\nFront of current card: " + keyValue);
+									while (!nextCard) {
+										nextAction = scnr.next();
+										if (nextAction.equals("H")) {
+											deckCommands();
+										}
+
+										else if (nextAction.equals("k"))  {
+											System.out.println("\nFront of current card: " + keyValue);
+										}
+
+										else if (nextAction.equals("j"))  {
+											System.out.println("\nBack of current card: " + deckBeingReviewed.get(keyValue));
+										}
+
+										else if (nextAction.equals("l")) {
+											nextCard = true;
+										}
+
+										// if user wants to stop reviewing and go back to the main menu
+										else if (nextAction.equals("qr") || nextAction.equals("mm")) {
+											userReviewing = false;
+											break;
+										}
+									}
+								}
+							}
+						}
+
+						else if (deckToReview.equals("h")) {
+							listCommands();
+						}
+
+						else if (deckToReview.equals("mm")) {
+							userInMainPartOfProgram = false;
+							userWantsToGoToMainMenu = true;
+						}
+
+						else {
+							System.out.println("Deck not found. Try again.");
+						}
+
 					}
 
 				}
@@ -160,22 +222,32 @@ public class Main {
 			}
 
 			else if (userAnswer.equals("dd")) {
-				System.out.print("Name of deck to delete (no spaces allowed + case sensitive): ");
+				deckDeletionPrompt();
 				String deckToDelete = scnr.next();
-				deckManager.deleteDeck(deckToDelete);
+				while (!deckToDelete.equals("mm")) {
+					deckManager.deleteDeck(deckToDelete);
+					deckDeletionPrompt();
+					deckToDelete = scnr.next();
+					if (deckToDelete.equals("mm")) {
+						userWantsToGoToMainMenu = true;
+					}
+				}
+			}
+
+			else if (userAnswer.equals("mm")) {
+				System.out.println("Already in main menu!");
 			}
 
 			else {
 				System.out.println("Invalid command. See 'h' for list of commands.");
 			}
+			// greet user again at the end of while loop
+			if (userWantsToGoToMainMenu) {
+				mainMenuGreet();
+				userWantsToGoToMainMenu = false;
+			}
 			userAnswer = scnr.next();
 		}
-		// deckManager.newDeck("Japanese");
-		// deckManager.newDeck("Human Anatomy");
-		// deckManager.newDeck("Geography");
-		//
-		// deckManager.printAllDecks();
-
 		scnr.close();
 	}
 }
